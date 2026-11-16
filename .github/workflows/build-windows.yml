@@ -28,10 +28,13 @@ jobs:
           .\dist\catalog-builder.exe --export tests\sample-export.xml --out test-out --no-pdf --no-web-checks
           if (!(Test-Path test-out\report.html)) { throw "report.html missing" }
           if (!(Test-Path test-out\indesign\_ALL-COURSES.txt)) { throw "InDesign file missing" }
+          if (!(Test-Path test-out\digital\index.html)) { throw "Digital catalog missing" }
       - name: Package
         run: |
           New-Item -ItemType Directory pkg | Out-Null
           Copy-Item dist\catalog-builder.exe, run-catalog-build.bat, config.example.json, README.md pkg\
+          Copy-Item deploy\run-nightly.bat pkg\
+          Copy-Item -Recurse deploy, docs, content pkg\
           Compress-Archive -Path pkg\* -DestinationPath catalog-builder-windows.zip
       - name: Upload (download it from the run's Summary page → Artifacts)
         uses: actions/upload-artifact@v4

@@ -1,0 +1,9 @@
+{
+  "export": "C:\\Program Files\\FileMaker\\FileMaker Server\\Data\\Documents\\catalog\\courses.xml",
+  "content": "\\\\server\\Catalog\\content",
+  "out": "\\\\server\\Catalog\\output",
+  "site": "\\\\vm-webserver\\www\\catalog",
+  "site_url": "https://my.iecc.edu/catalog",
+  "preview": true,
+  "sample_prefixes": "ACC,LSC,WEL"
+}

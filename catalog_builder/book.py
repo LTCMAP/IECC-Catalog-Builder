@@ -255,7 +255,8 @@ def calendar_html(path: Path) -> tuple[str, int, list[tuple[str, str]]]:
 def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, logo: Path | None = None) -> tuple[str, dict]:
     cat = json.loads((content_dir / "catalog.json").read_text(encoding="utf-8"))
     by_code = {c.code: c for c in courses}
-    stats = {"todos": {}, "issues": [], "programs": 0}
+    stats = {"todos": {}, "issues": [], "programs": 0,
+             "parts": {"cat": cat, "front": [], "sections": [], "program_index": ""}}
     from .policies import load_register, expand, register_issues
     policy_reg = load_register(content_dir)
     stats["issues"].extend(register_issues(policy_reg, cat.get("policies_reviewed", "")))
@@ -295,6 +296,7 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
         body, heads, todos, title = md_to_html(_md(f), id_prefix=slug(Path(f).stem) + "-")
         aid = slug(Path(f).stem)
         stats["todos"][f] = todos
+        stats["parts"]["front"].append({"id": aid, "title": title or aid, "html": body, "subs": heads})
         front.append(f'<section class="front" id="{aid}"><h1 class="page-title">{esc(title or aid)}</h1><div class="prose single">{body}</div></section>')
         toc_entries.append(("", title or aid, aid, []))
 
@@ -338,6 +340,8 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
                   f'<ul>{sub_list}</ul><div class="stripes diag">{stripes_diag(800, 600, 30, 16, 0.55)}</div>'
                   + (f'<div class="auto">{esc(auto)}</div>' if auto else "") + "</section>")
         secs.append(opener + content)
+        stats["parts"]["sections"].append({"id": s["id"], "num": num, "title": s["title"], "type": s["type"],
+                                           "html": "" if s["type"] == "courses" else content, "subs": subs, "auto": auto})
         toc_entries.append((num, s["title"], aid, subs))
 
     # ---- program index, grouped by meta major (content/programs/program-registry.csv)
@@ -368,6 +372,8 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
             title = mm or "Specialized & industry programs (not in a meta major)"
             blocks.append(f'<div class="mm"><h2 id="mm-{slug(title)}">{esc(title)} <span>{len(rows)} programs</span></h2>'
                           f'<table class="tbl"><thead><tr><th>Program</th><th>Department</th><th>Type</th><th>Code</th><th>Offered</th><th>Page</th></tr></thead><tbody>{"".join(trs)}</tbody></table></div>')
+        stats["parts"]["program_index"] = "".join(blocks)
+        stats["parts"]["program_count"] = len(registry)
         secs.append(f'<section class="front program-index" id="program-index"><h1 class="page-title">Programs by Meta Major</h1>'
                     f'<p class="lede">All {len(registry)} degrees, certificates, and transfer pathways, grouped the way students browse them at my.iecc.edu/metamajors.</p>{"".join(blocks)}</section>')
         toc_entries.append(("", "Programs by Meta Major", "program-index", [(m or "Specialized & industry programs", f"mm-{slug(m or 'Specialized & industry programs (not in a meta major)')}") for m, r in groups.items() if r]))

@@ -48,6 +48,10 @@ def main() -> int:
     ap.add_argument("--no-book", action="store_true", help="Skip the full-catalog PDF")
     ap.add_argument("--update-trustees", action="store_true", help="Copy the trustees list from iecc.edu into content/board.json")
     ap.add_argument("--no-web-checks", action="store_true", help="Skip checking iecc.edu (offline or test runs)")
+    ap.add_argument("--site", default=cfg.get("site"), help="Publish folder for the digital catalog + Drupal feeds (e.g. a network share or Git repo)")
+    ap.add_argument("--freeze", action="store_true", help="Also write this year's edition of record (once; never overwritten)")
+    ap.add_argument("--site-url", default=cfg.get("site_url", ""), help="Public URL of the publish folder, used in feed links")
+    ap.add_argument("--preview", action="store_true", default=bool(cfg.get("preview", False)), help="Tell search engines not to index the published site (draft/proofing)")
     ap.add_argument("--sample", default=cfg.get("sample_prefixes", "ACC,LSC,WEL"), help="Prefixes for the short sample PDF")
     a = ap.parse_args()
     if not a.export:
@@ -125,6 +129,22 @@ def main() -> int:
         except (ImportError, OSError) as e:
             print(f"Full catalog skipped (WeasyPrint not available: {e.__class__.__name__}).")
 
+    # Digital catalog (website) + Drupal feeds
+    site_result = None
+    if (content / "catalog.json").exists():
+        from catalog_builder.book import build_book_html
+        from catalog_builder.digital import build_site
+        _, wstats = build_book_html(courses, prefixes, content)
+        full_pdf = out / "print" / "full-catalog.pdf"
+        full_pdf = full_pdf if full_pdf.exists() else None
+        build_site(courses, prefixes, wstats["parts"], out / "digital", kind="current", built=" ".join(built_at.split(" ")[:3]), pdf=full_pdf)
+        if a.site:
+            from catalog_builder.publish import publish
+            site_result = publish(courses, prefixes, wstats["parts"], content, Path(a.site), built=" ".join(built_at.split(" ")[:3]),
+                                  pdf=full_pdf, freeze=a.freeze, base_url=a.site_url, preview=a.preview)
+            for sev, rule, code, msg in site_result["notes"]:
+                findings.append(Finding(sev, rule, code, msg))
+
     rpt = write_report(out / "report.html", findings=findings, changes=changes, meta=meta, n_courses=len(courses),
                        built_at=built_at, export_name=export.name)
 
@@ -138,6 +158,7 @@ def main() -> int:
     warns = sum(f.severity == "warning" for f in findings)
     print(f"InDesign files: {len(tt)} · PDFs: {len(pdfs)} · web: {web.name} · report: {rpt}")
     print(f"Checks: {errs} errors, {warns} warnings")
+    print(f"Digital catalog: {out / 'digital' / 'index.html'}" + (f" · published to {a.site} ({', '.join(site_result['years'])})" if site_result else ""))
     if changes:
         print(f"Changes since last build: +{len(changes['added'])} / -{len(changes['removed'])} / ~{len(changes['changed'])}")
     return 0
