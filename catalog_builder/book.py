@@ -87,7 +87,9 @@ def md_to_html(text: str, id_prefix: str = "") -> tuple[str, list[tuple[str, str
             while i < len(lines) and (re.match(r"\s*[-•] ", lines[i]) or re.match(r"\s*\d+\. ", lines[i])):
                 items.append(re.sub(r"^\s*([-•]|\d+\.) ", "", lines[i])); i += 1
             tag = "ol" if ordered else "ul"
-            out.append(f"<{tag}>" + "".join(f"<li>{_inline(x)}</li>" for x in items) + f"</{tag}>"); continue
+            start = re.match(r"\s*(\d+)\.", ln)
+            attr = f' start="{start.group(1)}"' if ordered and start and start.group(1) != "1" else ""
+            out.append(f"<{tag}{attr}>" + "".join(f"<li>{_inline(x)}</li>" for x in items) + f"</{tag}>"); continue
         if ln.startswith("|"):
             flush(); rows = []
             while i < len(lines) and lines[i].startswith("|"):
@@ -254,6 +256,13 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
     cat = json.loads((content_dir / "catalog.json").read_text(encoding="utf-8"))
     by_code = {c.code: c for c in courses}
     stats = {"todos": {}, "issues": [], "programs": 0}
+    from .policies import load_register, expand, register_issues
+    policy_reg = load_register(content_dir)
+    stats["issues"].extend(register_issues(policy_reg, cat.get("policies_reviewed", "")))
+
+    def _md(name):
+        from .trustees import expand as expand_trustees
+        return expand_trustees(expand((content_dir / name).read_text(encoding="utf-8"), content_dir, policy_reg, stats["issues"], name), content_dir)
     programs = [json.loads(f.read_text(encoding="utf-8")) for f in sorted((content_dir / "programs").glob("*.json"))]
     _reg = content_dir / "programs" / "program-registry.csv"
     registry_by_code = {}
@@ -283,7 +292,7 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
     toc_entries = []  # (number, title, anchor, [(sub, anchor)])
     front = []
     for f in cat.get("front_matter", []):
-        body, heads, todos, title = md_to_html((content_dir / f).read_text(encoding="utf-8"), id_prefix=slug(Path(f).stem) + "-")
+        body, heads, todos, title = md_to_html(_md(f), id_prefix=slug(Path(f).stem) + "-")
         aid = slug(Path(f).stem)
         stats["todos"][f] = todos
         front.append(f'<section class="front" id="{aid}"><h1 class="page-title">{esc(title or aid)}</h1><div class="prose single">{body}</div></section>')
@@ -302,13 +311,13 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
             stats["todos"]["calendar.csv"] = todos
             auto = "Generated from content/calendar.csv"
         elif s["type"] == "md":
-            body, subs, todos, _ = md_to_html((content_dir / s["text"]).read_text(encoding="utf-8"), id_prefix=f"{s['id']}-")
+            body, subs, todos, _ = md_to_html(_md(s["text"]), id_prefix=f"{s['id']}-")
             stats["todos"][s["text"]] = todos
             content = f'<div class="prose">{body}</div>'
         elif s["type"] == "programs":
             parts = []
             if s.get("text"):
-                body, subs, todos, _ = md_to_html((content_dir / s["text"]).read_text(encoding="utf-8"), id_prefix=f"{s['id']}-")
+                body, subs, todos, _ = md_to_html(_md(s["text"]), id_prefix=f"{s['id']}-")
                 stats["todos"][s["text"]] = todos
                 parts.append(f'<div class="prose">{body}</div>')
             group = [p for p in programs if p.get("group") == s.get("program_group")]

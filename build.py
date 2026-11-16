@@ -46,6 +46,8 @@ def main() -> int:
     ap.add_argument("--no-pdf", action="store_true", help="Skip the PDF proof (faster)")
     ap.add_argument("--content", default=cfg.get("content", str(HERE / "content")), help="Folder with catalog.json, sections/, calendar.csv, programs/")
     ap.add_argument("--no-book", action="store_true", help="Skip the full-catalog PDF")
+    ap.add_argument("--update-trustees", action="store_true", help="Copy the trustees list from iecc.edu into content/board.json")
+    ap.add_argument("--no-web-checks", action="store_true", help="Skip checking iecc.edu (offline or test runs)")
     ap.add_argument("--sample", default=cfg.get("sample_prefixes", "ACC,LSC,WEL"), help="Prefixes for the short sample PDF")
     a = ap.parse_args()
     if not a.export:
@@ -55,10 +57,28 @@ def main() -> int:
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     state_file = out / ".last_build.json"
-    digest = hashlib.sha256(export.read_bytes()).hexdigest()
+    content = Path(a.content)
+    trustee_findings = []
+    # Board of Trustees: compare content/board.json with the live iecc.edu page
+    if not a.no_web_checks and (content / "catalog.json").exists():
+        from catalog_builder.trustees import check as check_trustees, DEFAULT_URL
+        _url = json.loads((content / "catalog.json").read_text(encoding="utf-8")).get("trustees_url", DEFAULT_URL)
+        _tr = check_trustees(content, _url, update=a.update_trustees)
+        for sev, rule, code, msg in _tr:
+            trustee_findings.append((sev, rule, code, msg))
+        print("Trustees: " + ("matches iecc.edu" if not _tr else f"{len(_tr)} item(s) to review (see report)"))
+
+
+    # Rebuild when the export, the template content, or the trustee check result changes
+    h = hashlib.sha256(export.read_bytes())
+    if content.exists():
+        for f in sorted(p for p in content.rglob("*") if p.is_file()):
+            h.update(str(f.relative_to(content)).encode()); h.update(f.read_bytes())
+    h.update(json.dumps(trustee_findings).encode())
+    digest = h.hexdigest()
     state = json.loads(state_file.read_text()) if state_file.exists() else {}
     if a.only_if_changed and state.get("sha256") == digest:
-        print("Export unchanged since last build. Nothing to do.")
+        print("Export, content and trustees unchanged since last build. Nothing to do.")
         return 0
 
     built_at = datetime.now().strftime("%B %d, %Y %I:%M %p").replace(" 0", " ")
@@ -72,6 +92,7 @@ def main() -> int:
     courses, meta = load_export(str(export))
     print(f"Loaded {len(courses)} courses from {export.name}")
     findings = run_checks(courses, meta, prefixes, print_cmp)
+    findings += [Finding(*t) for t in trustee_findings]
 
     # Change detection against the previous snapshot
     snaps = out / "snapshots"
@@ -90,7 +111,6 @@ def main() -> int:
         except (ImportError, OSError) as e:
             print(f"PDF proof skipped (WeasyPrint not available: {e.__class__.__name__}). Everything else was built.")
     # Full catalog (template + FileMaker data)
-    content = Path(a.content)
     if not a.no_pdf and not a.no_book and (content / "catalog.json").exists():
         try:
             from catalog_builder.book import write_book

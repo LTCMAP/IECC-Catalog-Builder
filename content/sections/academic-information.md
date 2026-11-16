@@ -6,11 +6,11 @@ TODO: Paste the current “Credit” text here.
 
 ## Dual Credit
 
-TODO: Paste the current “Dual Credit” text here.
+{{policy 500.31}}
 
 ## Grades and Grading System
 
-TODO: Paste the current “Grades and Grading System” text here.
+{{policy 500.35}}
 
 ## Grade Point Average (GPA)
 
@@ -42,11 +42,11 @@ TODO: Paste the current “Auditing” text here.
 
 ## Course Repeat Policy
 
-TODO: Paste the current “Course Repeat Policy” text here.
+{{policy 500.4}}
 
 ## Withdrawal Policy
 
-TODO: Paste the current “Withdrawal Policy” text here.
+{{policy 500.30}}
 
 ## Distance Education
 
@@ -58,19 +58,19 @@ TODO: Paste the current “Advisement” text here.
 
 ## Academic Standing Policy
 
-TODO: Paste the current “Academic Standing Policy” text here.
+{{policy 500.20}}
 
 ## Student Attendance Policy
 
-TODO: Paste the current “Student Attendance Policy” text here.
+{{policy 500.41}}
 
 ## Term Honors
 
-TODO: Paste the current “Term Honors” text here.
+{{policy 500.46}}
 
 ## Graduation Requirements Policy
 
-TODO: Paste the current “Graduation Requirements Policy” text here.
+{{policy 500.38}}
 
 ## Transcript Requests
 
@@ -94,13 +94,15 @@ TODO: Paste the current “Persistence and Degree Completion” text here.
 
 ## Educational Guarantee Policies
 
-TODO: Paste the current “Educational Guarantee Policies” text here.
+{{policy 800.10}}
+
+{{policy 800.11}}
 
 ## Academic Freedom Policy
 
-TODO: Paste the current “Academic Freedom Policy” text here.
+{{policy 800.6}}
 
 ## Academic Integrity Policy
 
-TODO: Paste the current “Academic Integrity Policy” text here.
+{{policy 500.25}}
 

@@ -2,15 +2,15 @@
 
 ## Appendix A: Time to Completion for Career and Technical Education Curricula Policy
 
-TODO: Paste the current “Appendix A: Time to Completion for Career and Technical Education Curricula Policy” text here.
+{{policy 800.5}}
 
 ## Appendix B: Dual Credit Policy
 
-TODO: Paste the current “Appendix B: Dual Credit Policy” text here.
+{{policy 500.31}}
 
 ## Appendix C: Credit for Prior Learning
 
-TODO: Paste the current “Appendix C: Credit for Prior Learning” text here.
+{{policy 500.5}}
 
 ## Appendix D: Persistence and Degree Completion
 
@@ -18,29 +18,31 @@ TODO: Paste the current “Appendix D: Persistence and Degree Completion” text
 
 ## Appendix E: Educational Guarantee Policies
 
-TODO: Paste the current “Appendix E: Educational Guarantee Policies” text here.
+{{policy 800.10}}
+
+{{policy 800.11}}
 
 ## Appendix F: Family Educational Rights and Privacy Policy
 
-TODO: Paste the current “Appendix F: Family Educational Rights and Privacy Policy” text here.
+{{policy 500.11}}
 
 ## Appendix G: Appropriate Use of Information Technology Resources Policy
 
-TODO: Paste the current “Appendix G: Appropriate Use of Information Technology Resources Policy” text here.
+{{policy 200.2}}
 
 ## Appendix H: Weapons and Concealed Firearms Policy
 
-TODO: Paste the current “Appendix H: Weapons and Concealed Firearms Policy” text here.
+{{policy 100.28}}
 
 ## Appendix I: Alcohol-free/Drug-free Campus Policy
 
-TODO: Paste the current “Appendix I: Alcohol-free/Drug-free Campus Policy” text here.
+{{policy 100.9}}
 
 ## Appendix J: Tobacco-free/Smoke-free Campus Policy
 
-TODO: Paste the current “Appendix J: Tobacco-free/Smoke-free Campus Policy” text here.
+{{policy 100.15}}
 
 ## Appendix K: Preventing Sexual Misconduct Policy
 
-TODO: Paste the current “Appendix K: Preventing Sexual Misconduct Policy” text here.
+{{policy 100.31}}
 

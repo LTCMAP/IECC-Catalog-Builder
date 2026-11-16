@@ -1,9 +1,5 @@
-<!-- Board of Trustees: edit this file. Lines starting with TODO: print as a highlighted placeholder and are counted in the build report. -->
+<!-- Board of Trustees. The table prints from content/board.json. Every build checks it against the trustees page on iecc.edu and lists any differences in the report. -->
 
-| Name | Position | Term |
-|---|---|---|
-| TODO: Trustee name | Chair / Member | 20XX |
-| TODO: Trustee name | Chair / Member | 20XX |
-| TODO: Trustee name | Chair / Member | 20XX |
+The Board of Trustees is charged with establishing policy for the financing, governance, operation, and administration of Illinois Eastern Community Colleges. Seven voting members are elected from the District at large, each serving a six-year term. A non-voting student trustee, elected by student referendum on a rotating basis from each campus, serves a one-year term from April to March.
 
-TODO: Confirm trustee list and student trustee for this catalog year.
+{{trustees}}

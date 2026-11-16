@@ -25,9 +25,9 @@ jobs:
           build.py
       - name: Smoke test (build from the 12-course sample)
         run: |
-          .\dist\catalog-builder.exe --export tests\sample-export.xml --out test-out --no-pdf
+          .\dist\catalog-builder.exe --export tests\sample-export.xml --out test-out --no-pdf --no-web-checks
           if (!(Test-Path test-out\report.html)) { throw "report.html missing" }
-          if (!(Test-Path test-out\indesign\ACC.txt)) { throw "InDesign file missing" }
+          if (!(Test-Path test-out\indesign\_ALL-COURSES.txt)) { throw "InDesign file missing" }
       - name: Package
         run: |
           New-Item -ItemType Directory pkg | Out-Null

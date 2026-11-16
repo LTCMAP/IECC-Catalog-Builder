@@ -2,23 +2,23 @@
 
 ## Americans with Disabilities Act
 
-TODO: Paste the current “Americans with Disabilities Act” text here.
+{{policy 100.12}}
 
 ## Nondiscrimination Policy
 
-TODO: Paste the current “Nondiscrimination Policy” text here.
+{{policy 100.8}}
 
 ## Family Educational Rights and Privacy
 
-TODO: Paste the current “Family Educational Rights and Privacy” text here.
+{{policy 500.11}}
 
 ## Student Religious Observances Policy
 
-TODO: Paste the current “Student Religious Observances Policy” text here.
+{{policy 500.34}}
 
 ## Appropriate Use of Information Technology Resources Policy
 
-TODO: Paste the current “Appropriate Use of Information Technology Resources Policy” text here.
+{{policy 200.2}}
 
 ## Student Email and Electronic Communications
 
@@ -30,7 +30,7 @@ TODO: Paste the current “Campus Safety and Security” text here.
 
 ## Emergency Management
 
-TODO: Paste the current “Emergency Management” text here.
+{{policy 100.24}}
 
 ## IECC Alerts
 
@@ -38,37 +38,37 @@ TODO: Paste the current “IECC Alerts” text here.
 
 ## Weapons and Concealed Firearms Policy
 
-TODO: Paste the current “Weapons and Concealed Firearms Policy” text here.
+{{policy 100.28}}
 
 ## Alcohol-free/Drug-free Campus Policy
 
-TODO: Paste the current “Alcohol-free/Drug-free Campus Policy” text here.
+{{policy 100.9}}
 
 ## Tobacco-free/Smoke-free Campus Policy
 
-TODO: Paste the current “Tobacco-free/Smoke-free Campus Policy” text here.
+{{policy 100.15}}
 
 ## Preventing Sexual Misconduct
 
-TODO: Paste the current “Preventing Sexual Misconduct” text here.
+{{policy 100.31}}
 
 ## Sex Offender Registration
 
-TODO: Paste the current “Sex Offender Registration” text here.
+{{policy 100.36}}
 
 ## Chronic Communicable Diseases
 
-TODO: Paste the current “Chronic Communicable Diseases” text here.
+{{policy 100.10}}
 
 ## Hazing Policy
 
-TODO: Paste the current “Hazing Policy” text here.
+{{policy 500.28}}
 
 ## Student Conduct Policy
 
-TODO: Paste the current “Student Conduct Policy” text here.
+{{policy 500.8}}
 
 ## Policy to Address a Complaint
 
-TODO: Paste the current “Policy to Address a Complaint” text here.
+{{policy 100.16}}
 
