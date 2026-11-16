@@ -1,0 +1,137 @@
+{
+  "year": "2026–2027",
+  "title": "Academic Catalog",
+  "district": "Illinois Eastern Community Colleges",
+  "url": "www.iecc.edu/catalog",
+  "front_matter": [
+    "sections/mission-vision-values.md",
+    "sections/student-learning.md"
+  ],
+  "colleges": [
+    {
+      "code": "FCC",
+      "name": "Frontier Community College",
+      "address": "2 Frontier Drive",
+      "city": "Fairfield, IL 62837-2601",
+      "phone": "618-842-3711",
+      "tollfree": "877-464-3687"
+    },
+    {
+      "code": "LTC",
+      "name": "Lincoln Trail College",
+      "address": "11220 State Highway 1",
+      "city": "Robinson, IL 62454-5707",
+      "phone": "618-544-8657",
+      "tollfree": "866-582-4322"
+    },
+    {
+      "code": "OCC",
+      "name": "Olney Central College",
+      "address": "305 North West Street",
+      "city": "Olney, IL 62450-1099",
+      "phone": "618-395-7777",
+      "tollfree": "866-622-4322"
+    },
+    {
+      "code": "WVC",
+      "name": "Wabash Valley College",
+      "address": "2200 College Drive",
+      "city": "Mt. Carmel, IL 62863-2699",
+      "phone": "618-262-8641",
+      "tollfree": "866-982-4322"
+    }
+  ],
+  "district_office": {
+    "name": "IECC District Office",
+    "address": "233 East Chestnut Street",
+    "city": "Olney, IL 62450-2298",
+    "phone": "618-393-2982",
+    "tollfree": "866-529-4322"
+  },
+  "sections": [
+    {
+      "id": "academic-calendar",
+      "title": "Academic Calendar",
+      "type": "calendar"
+    },
+    {
+      "id": "board",
+      "title": "Board of Trustees",
+      "type": "md",
+      "text": "sections/board.md"
+    },
+    {
+      "id": "administration",
+      "title": "Administration",
+      "type": "md",
+      "text": "sections/administration.md"
+    },
+    {
+      "id": "general-information",
+      "title": "General Information",
+      "type": "md",
+      "text": "sections/general-information.md"
+    },
+    {
+      "id": "admission",
+      "title": "Admission & Registration Information",
+      "type": "md",
+      "text": "sections/admission.md"
+    },
+    {
+      "id": "academic-information",
+      "title": "Academic Information",
+      "type": "md",
+      "text": "sections/academic-information.md"
+    },
+    {
+      "id": "student-rights",
+      "title": "Student Rights & Responsibilities",
+      "type": "md",
+      "text": "sections/student-rights.md"
+    },
+    {
+      "id": "student-services",
+      "title": "Student Services",
+      "type": "md",
+      "text": "sections/student-services.md"
+    },
+    {
+      "id": "financial",
+      "title": "Financial Information",
+      "type": "md",
+      "text": "sections/financial.md"
+    },
+    {
+      "id": "transfer",
+      "title": "Transfer Program Information",
+      "type": "programs",
+      "program_group": "transfer",
+      "text": "sections/transfer.md"
+    },
+    {
+      "id": "health",
+      "title": "Health Professions",
+      "type": "programs",
+      "program_group": "health"
+    },
+    {
+      "id": "cte",
+      "title": "Career and Technical Program Information",
+      "type": "programs",
+      "program_group": "cte",
+      "text": "sections/cte.md"
+    },
+    {
+      "id": "courses",
+      "title": "Course Information",
+      "type": "courses"
+    },
+    {
+      "id": "appendices",
+      "title": "Appendices",
+      "type": "md",
+      "text": "sections/appendices.md"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+name: Build Windows app
+
+# Run from the repo's Actions tab ("Run workflow"), or push a tag like v0.2
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install PyInstaller
+        run: pip install pyinstaller
+      - name: Build catalog-builder.exe
+        run: >
+          pyinstaller --onefile --name catalog-builder
+          --add-data "catalog_builder/assets;catalog_builder/assets"
+          --add-data "config;config"
+          --add-data "content;content"
+          build.py
+      - name: Smoke test (build from the 12-course sample)
+        run: |
+          .\dist\catalog-builder.exe --export tests\sample-export.xml --out test-out --no-pdf
+          if (!(Test-Path test-out\report.html)) { throw "report.html missing" }
+          if (!(Test-Path test-out\indesign\ACC.txt)) { throw "InDesign file missing" }
+      - name: Package
+        run: |
+          New-Item -ItemType Directory pkg | Out-Null
+          Copy-Item dist\catalog-builder.exe, run-catalog-build.bat, config.example.json, README.md pkg\
+          Compress-Archive -Path pkg\* -DestinationPath catalog-builder-windows.zip
+      - name: Upload (download it from the run's Summary page → Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-builder-windows
+          path: catalog-builder-windows.zip
+      - name: Attach to a Release (tag pushes only)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: catalog-builder-windows.zip

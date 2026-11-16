@@ -1,0 +1,6 @@
+{
+  "export": "\\\\server\\Catalog\\exports\\courses.xml",
+  "out": "\\\\server\\Catalog\\output",
+  "sample_prefixes": "ACC,LSC,WEL",
+  "print_comparison": "../local-config/print_comparison_2026-27.json"
+}

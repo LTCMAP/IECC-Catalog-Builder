@@ -1,0 +1,12 @@
+out/
+source-data/
+*.xml
+config.json
+__pycache__/
+dist/
+build/
+*.spec
+.DS_Store
+!tests/*.xml
+config/print_comparison*.json
+local-config/

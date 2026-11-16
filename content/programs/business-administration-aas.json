@@ -1,0 +1,61 @@
+{
+  "title": "Business Administration",
+  "award": "Associate in Applied Science",
+  "code": "BUS D186",
+  "group": "cte",
+  "campuses": ["FCC", "LTC", "OCC", "WVC"],
+  "stated_total": 65,
+  "description": "The Business Administration program prepares individuals to plan, organize, direct, and control the functions and processes of a firm or organization. Students select their accounting, marketing, or organizational leadership concentration electives as they enter the second semester. Program graduates seek employment opportunities in diverse sectors including business, banking, education, public relations, law, marketing, and accounting.",
+  "_how_to_edit": "List course codes only — titles and credits come from FileMaker. Use {\"any\": [...]} for OR choices, {\"label\": ..., \"credits\": n} for elective slots. Flags: gened (¹), diversity (*).",
+  "terms": [
+    {"name": "First Semester", "items": [
+      {"course": "ACC 2101"},
+      {"course": "BUS 1101"},
+      {"course": "DAP 1201"},
+      {"any": ["ENG 1111", "ENG 1212"], "gened": true},
+      {"course": "FYE 1198"},
+      {"any": ["PSY 1101", "PSY 1103"], "gened": true, "diversity": true}
+    ]},
+    {"name": "Second Semester", "items": [
+      {"course": "ACC 2102"},
+      {"course": "BUS 2201"},
+      {"course": "CIS 1278"},
+      {"course": "FYE 1199"},
+      {"any": ["SPE 1101", "SPE 1111"], "gened": true},
+      {"label": "Concentration Elective I", "credits": 3}
+    ]},
+    {"name": "Third Semester", "items": [
+      {"any": ["BMG 2103", "MTH 1131"], "gened": true},
+      {"course": "BMK 2101"},
+      {"course": "BUS 2101"},
+      {"course": "BUS 2205"},
+      {"label": "Concentration Elective II", "credits": 3},
+      {"label": "Concentration Elective III", "credits": 3}
+    ]},
+    {"name": "Fourth Semester", "items": [
+      {"course": "BUS 2105"},
+      {"course": "DAP 1237"},
+      {"course": "ECN 2101", "gened": true},
+      {"label": "Concentration Elective IV", "credits": 3},
+      {"label": "Concentration Elective V", "credits": 3}
+    ]}
+  ],
+  "gened_hours": 15,
+  "option_groups": {
+    "title": "Concentration Elective Options",
+    "groups": [
+      {"name": "Accounting", "items": [
+        {"course": "ACC 1202"}, {"course": "ACC 2121"}, {"course": "ACC 2222"}, {"course": "ACC 2241"},
+        {"any": ["ACC 2298", "ACC 1204"]}
+      ]},
+      {"name": "Marketing", "items": [
+        {"course": "BMK 1202"}, {"course": "BMK 1203"}, {"any": ["BMK 1205", "BMK 1207"]},
+        {"course": "BMK 2102"}, {"course": "BRD 1208"}
+      ]},
+      {"name": "Organizational Leadership", "items": [
+        {"course": "BMG 1205"}, {"course": "BMG 2204"}, {"course": "BMG 2205"},
+        {"any": ["BMG 2298", "BMG 1211"]}, {"course": "BUS 2208"}
+      ]}
+    ]
+  }
+}
