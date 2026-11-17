@@ -147,6 +147,8 @@ def write_tagged_text(courses, prefixes, out_dir: Path) -> list[Path]:
         for c in cs:
             body += course_lines(c)
         f = out_dir / f"{p}.txt"
+        if p.upper() in {"CON", "PRN", "AUX", "NUL"} or re.fullmatch(r"(COM|LPT)[1-9]", p.upper()):
+            f = out_dir / f"{p}-courses.txt"  # reserved device names on Windows (CON.txt would print to the screen)
         f.write_text("\r\n".join(header + body) + "\r\n", encoding="ascii")
         written.append(f)
         all_lines += body
