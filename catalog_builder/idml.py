@@ -173,6 +173,8 @@ class _Blocks(HTMLParser):
         if tag == "i" and not cls:
             self.char.append("Italic")
             return
+        if tag in ("b", "strong") and self.th_parts and self.para:
+            self.para[1].append((ACE_RIGHT_TAB, None))
         if tag in ("b", "strong"):
             self.char.append("Bold"); return
         if tag == "em":
@@ -244,6 +246,7 @@ class _Blocks(HTMLParser):
                 self.th_parts = []
             elif "total" in cls:
                 self._start_para("Program Total")
+                self.th_parts = []
             elif "notes" in cls:
                 self._start_para("Notes")
 
@@ -290,6 +293,8 @@ class _Blocks(HTMLParser):
                 self.blocks.append(("table", self.table))
             self.table = None
             return
+        if tag == "div" and "total" in cls:
+            self.th_parts = None
         if tag == "div" and "th" in cls:
             self.th_parts = None
             self._end_para()
