@@ -43,8 +43,8 @@ From source: Python 3.10+, `pip install -r requirements.txt`, then `python build
   "site_url": "https://my.iecc.edu/catalog",
   "preview": true,
   "indesign_fonts": {
-    "sans":  {"family": "Futura PT", "regular": "Book", "medium": "Medium", "semibold": "Demi", "bold": "Bold", "italic": "Book Oblique"},
-    "serif": {"family": "Adobe Garamond Pro", "regular": "Regular", "medium": "Semibold", "semibold": "Semibold", "bold": "Bold", "italic": "Italic"}
+    "sans":  {"family": "Futura PT", "regular": "Book", "medium": "Medium", "semibold": "Medium", "bold": "Bold", "italic": "Book Oblique"},
+    "serif": {"family": "EB Garamond", "regular": "Regular", "medium": "Medium", "semibold": "SemiBold", "bold": "Bold", "italic": "Italic"}
   }
 }
 ```

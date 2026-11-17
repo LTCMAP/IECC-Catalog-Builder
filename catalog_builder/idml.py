@@ -37,8 +37,8 @@ FRAME = (MARGIN["left"], MARGIN["top"], PAGE_W - MARGIN["right"], PAGE_H - MARGI
 GUTTER = 18.0
 
 DEFAULT_FONTS = {
-    "sans": {"family": "Futura PT", "regular": "Book", "medium": "Medium", "semibold": "Demi", "bold": "Bold", "italic": "Book Oblique"},
-    "serif": {"family": "Adobe Garamond Pro", "regular": "Regular", "medium": "Semibold", "semibold": "Semibold", "bold": "Bold", "italic": "Italic"},
+    "sans": {"family": "Futura PT", "regular": "Book", "medium": "Medium", "semibold": "Medium", "bold": "Bold", "italic": "Book Oblique"},
+    "serif": {"family": "EB Garamond", "regular": "Regular", "medium": "Medium", "semibold": "SemiBold", "bold": "Bold", "italic": "Italic"},
 }
 
 COLORS = {  # name: (R, G, B)
@@ -415,14 +415,31 @@ def _table_xml(rows, ids: Ids, width: float, last: bool) -> str:
     for r in rows:
         for i, c in enumerate(r[:ncol]):
             lens[i] = max(lens[i], min(60, len("".join(t for t, _ in c[1]))))
-    weights = [max(5, l) for l in lens]
-    tot = sum(weights)
-    widths = [max(34.0, width * w / tot) for w in weights]
-    scale = width / sum(widths)
-    widths = [w * scale for w in widths]
+    # fixed widths for known column kinds (course code, credits, calendar month/day); the rest share what's left
+    FIXED = {"c": 62.0, "cr": 38.0, "m": 70.0, "d": 56.0, "cd": 46.0, "ty": 62.0}
+    kinds = [None] * ncol
+    for r in rows:
+        for i, c in enumerate(r[:ncol]):
+            k = next((k for k in FIXED if k in c[2]), None)
+            if k and kinds[i] is None:
+                kinds[i] = k
+    fixed_total = sum(FIXED[k] for k in kinds if k)
+    free = [i for i in range(ncol) if not kinds[i]]
+    if free and fixed_total < width * 0.8:
+        weights = {i: max(5, lens[i]) for i in free}
+        tw = sum(weights.values())
+        widths = [FIXED[kinds[i]] if kinds[i] else (width - fixed_total) * weights[i] / tw for i in range(ncol)]
+    else:
+        weights = [max(5, l) for l in lens]
+        tot = sum(weights)
+        widths = [max(34.0, width * w / tot) for w in weights]
+        scale = width / sum(widths)
+        widths = [w * scale for w in widths]
     tid = ids()
     x = [f'<Table Self="{tid}" HeaderRowCount="{head}" FooterRowCount="0" BodyRowCount="{len(rows) - head}" ColumnCount="{ncol}" '
-         f'AppliedTableStyle="TableStyle/$ID/[Basic Table]" TableDirection="LeftToRightDirection">']
+         f'AppliedTableStyle="TableStyle/$ID/[Basic Table]" TableDirection="LeftToRightDirection" '
+         f'TopBorderStrokeWeight="0" BottomBorderStrokeWeight="0.5" LeftBorderStrokeWeight="0" RightBorderStrokeWeight="0" '
+         f'BottomBorderStrokeColor="Color/IECC Teal Tint">']
     for ri in range(len(rows)):
         x.append(f'<Row Self="{tid}Row{ri}" Name="{ri}" SingleRowHeight="14" MinimumHeight="14" AutoGrow="true"/>')
     for ci, w in enumerate(widths):
@@ -434,7 +451,8 @@ def _table_xml(rows, ids: Ids, width: float, last: bool) -> str:
             style = "Table Head" if is_head else ("Table Credits" if "cr" in c[2] else "Table Body")
             fill = ' FillColor="Color/IECC Teal"' if is_head else ""
             stroke = ('TopEdgeStrokeWeight="0" LeftEdgeStrokeWeight="0" RightEdgeStrokeWeight="0" BottomEdgeStrokeWeight="0.5" '
-                      'BottomEdgeStrokeColor="Color/IECC Teal Tint" ')
+                      'BottomEdgeStrokeColor="Color/IECC Teal Tint" LeftEdgeStrokeColor="Swatch/None" RightEdgeStrokeColor="Swatch/None" '
+                      'TopEdgeStrokeColor="Swatch/None" ')
             runs = c[1] or [("", None)]
             x.append(f'<Cell Self="{tid}i{ci}_{ri}" Name="{ci}:{ri}" RowSpan="1" ColumnSpan="1" AppliedCellStyle="CellStyle/$ID/[None]" '
                      f'AppliedCellStylePriority="0" {stroke}TopInset="3" BottomInset="3" LeftInset="4" RightInset="4"{fill}>'

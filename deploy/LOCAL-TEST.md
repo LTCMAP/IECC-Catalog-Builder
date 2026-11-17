@@ -59,7 +59,7 @@ It takes about 3 minutes; the full-catalog PDF is the slow part. When it finishe
 
 ## 6. Open the IDML in InDesign
 
-1. **Fonts:** the IDML uses the brand fonts **Futura PT** and **Adobe Garamond Pro**. Activate both in Adobe Fonts first, or InDesign will flag them as missing. To use other fonts, add an `indesign_fonts` block to `config.json` (see the README).
+1. **Fonts:** the IDML uses the brand fonts **Futura PT** (Book, Medium, Bold) and **EB Garamond**. Activate both in Adobe Fonts first, or InDesign will flag them as missing. To use other fonts, add an `indesign_fonts` block to `config.json` (see the README).
 2. Double-click the `.idml`. InDesign opens it as a new untitled document; **Save As** an `.indd`.
 3. **Fit the pages (once):** page counts in the IDML are estimates. Install the script:
    *Window → Utilities → Scripts*, right-click **User** → **Reveal in Explorer**, copy `Fit catalog pages.jsx` into that folder, then double-click it in the Scripts panel. It adds pages wherever a section runs long and removes empty ones, then reports what it did.
@@ -82,4 +82,4 @@ Then schedule it with `deploy\install-scheduled-task.ps1` (see `SERVER-SETUP.md`
 | `No export given` / file not found | check `exports\courses.xml` exists and `config.json` sits next to the exe |
 | "PDF skipped" in the window | the `weasyprint` folder must sit next to `catalog-builder.exe`; re-extract the zip |
 | IDML text shows red overset `+` | run `Fit catalog pages.jsx` (step 6.3) |
-| Missing fonts in InDesign | activate Futura PT and Adobe Garamond Pro, or change `indesign_fonts` |
+| Missing fonts in InDesign | activate Futura PT and EB Garamond, or change `indesign_fonts` |
