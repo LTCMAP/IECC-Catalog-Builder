@@ -1,90 +1,95 @@
 # IECC catalog-builder
 
-Turns the FileMaker course export into every version of the catalog's course section:
+Turns the FileMaker course export, plus the catalog's own content folder, into every version of the IECC Academic Catalog:
 
-| Output | Path | Used for |
+| Output | Where | Used for |
 |---|---|---|
-| InDesign Tagged Text | `out/indesign/<PREFIX>.txt` (one per subject) + `_ALL-COURSES.txt` | Placed **and linked** in the InDesign catalog. When data changes, the Links panel flags the story and you click Update. |
-| Print proof | `out/print/course-descriptions.pdf` (+ a short `-sample.pdf`) | The designed course section, tagged PDF. Good for proofing or as a stand-in if InDesign isn't used. |
-| Web catalog | `out/web/course-descriptions.html` | Single-file, searchable, accessible course list (search, subject, college, IAI filters). |
-| Data | `out/data/courses.json`, `courses.csv` | Clean data for Drupal Feeds or anything else. |
-| Report | `out/report.html` | Data checks, plus **what changed since the last build** (your addendum draft). |
+| **InDesign IDML** (full catalog) | `output/indesign/IECC-Academic-Catalog-<year>.idml` + `Fit catalog pages.jsx` | Marketing's starting document: every section, program table and course, all on named paragraph/character styles. |
+| InDesign Tagged Text | `output/indesign/<PREFIX>.txt` + `_ALL-COURSES.txt` | Place **linked** in an InDesign document; the Links panel flags changes, and Update pulls them in. |
+| Full catalog PDF | `output/print/full-catalog.pdf` | Tagged PDF/UA proof of the whole catalog (brand template). |
+| Digital catalog | `output/digital/` and, with `site`, `site/current/` + `site/<year>/` | Searchable website: **current** (rebuilt every run) and **frozen editions of record** (Board Policy 500.36). |
+| Drupal feeds | `site/feeds/*.csv` | Courses, programs and addenda for Drupal Feeds (`docs/DRUPAL-SETUP.md`). |
+| Report | `output/report.html` | Data checks, trustee/policy checks, and **what changed since the last build** (the addendum draft). |
 
-Nothing is published automatically. The builder makes drafts; a person reviews the report and updates the InDesign links.
+Nothing is published unless `site` is set, and frozen editions are never overwritten.
+
+**Setting it up:** `deploy/LOCAL-TEST.md` (one PC, test folder) → `deploy/SERVER-SETUP.md` (FileMaker Server + scheduled task).
 
 ---
 
-## 1. FileMaker export (one-time setup)
+## Running it
 
-1. In FileMaker, find the courses to publish (the catalog's found set).
-2. **File › Export Records…** › type **XML** › grammar **FMPXMLRESULT**, no XSL.
-3. Field export order (names matter, order doesn't):
-   `CRSM_SUBNUM, CRSM_DESCRIPTION, CRSM_IAI_1_EXPORT … CRSM_IAI_6_EXPORT, CRSM_COLLEGE_FCC/LTC/OCC/WVC, CRSM_TITLE_COURSE, CRSM_CREDIT_VARIABLE, CRSM_CREDIT_HOURS, CRSM_CREDIT_LAB, CRSM_CREDIT_LECTURE, CRSM_DESCRIPTION_APPEND`
-4. Save the export to the shared folder, e.g. `\\server\Catalog\exports\courses.xml`.
-5. Save it all as a script step (**Export Records**, "Perform without dialog") on a button called **Export for Catalog**.
+Windows (download from Releases): put `config.json` next to `catalog-builder.exe` and double-click `run-catalog-build.bat`, or run `catalog-builder.exe` from a command prompt.
 
-## 2. Run the builder
+From source: Python 3.10+, `pip install -r requirements.txt`, then `python build.py`.
 
+| Option | What it does |
+|---|---|
+| `--freeze` | Also writes this year's **edition of record** (`site/2026-27/`). Once per catalog year. |
+| `--only-if-changed` | Exits right away if the export, content and trustee list are unchanged (scheduled runs). |
+| `--no-pdf` / `--no-book` / `--no-idml` | Skip the PDFs / the full-catalog PDF / the IDML. |
+| `--update-trustees` | Copy the Board of Trustees from iecc.edu into `content/board.json`. |
+| `--no-web-checks` | Don't check iecc.edu (offline runs). |
+
+## config.json
+
+```json
+{
+  "export": "..\\exports\\courses.xml",
+  "content": "content",
+  "out": "..\\output",
+  "marketing_folder": "..\\marketing",
+  "site": "..\\site",
+  "site_url": "https://my.iecc.edu/catalog",
+  "preview": true,
+  "indesign_fonts": {
+    "sans":  {"family": "Futura PT", "regular": "Book", "medium": "Medium", "semibold": "Demi", "bold": "Bold", "italic": "Book Oblique"},
+    "serif": {"family": "Adobe Garamond Pro", "regular": "Regular", "medium": "Semibold", "semibold": "Semibold", "bold": "Bold", "italic": "Italic"}
+  }
+}
 ```
-python build.py --export "\\server\Catalog\exports\courses.xml" --out "\\server\Catalog\output"
-```
 
-Or put the paths in `config.json` (copy `config.example.json`) and just run `python build.py`.
+- Relative paths are relative to the folder holding the exe. In JSON, write each `\` as `\\`.
+- `marketing_folder`: after each build, the IDML, the page-fitting script, the full PDF and the report are copied here.
+- `indesign_fonts` is optional; the values above are the defaults (the brand fonts). Each style weight maps to a font style name.
+- `weasyprint`: optional path to a `weasyprint.exe` if it isn't in the `weasyprint` folder next to the builder.
 
-Options:
-- `--only-if-changed`: does nothing if the export is identical to last time. Use this for scheduled runs.
-- `--no-pdf`: skips the PDF proof (about 1 minute faster).
-- `--sample ACC,LSC,WEL`: sets which subjects go into the short sample PDF.
+## The IDML
 
-Requirements: Python 3.10+, then `pip install -r requirements.txt`.
+- Letter pages, one parent page (A-Catalog: running head, teal rule, page number), one story per section, each starting on a new page. Course Descriptions is two columns.
+- **Paragraph styles:** Section Title, Kicker, Heading 2–4, Body, Lede, Bullet, Numbered, Source Note, Placeholder, Program Title, Program Meta, Program Description, Term Head, Program Total, Table Head, Table Body, Table Credits, Subject Head, Course Head, Course Meta, Course Description, Course Requisite, Running Head, Folio, Cover styles.
+- **Character styles:** Course Code, Credits, Campus FCC/LTC/OCC/WVC, IAI, Requisite Label, Bold, Italic, Superscript, Or, Missing.
+- **Swatches:** IECC Teal, FCC Gold, LTC Green, OCC Navy, WVC Red, Catalog Ink, Catalog Gray.
+- Page counts are estimates. Run **Fit catalog pages.jsx** once after opening (it adds pages for overset text and removes empty ones).
+- The Tagged Text files use the same course style names, so the IDML and the linked text files can be mixed.
 
-### Making it a double-click .exe (no Python on her machine)
+## Content folder (`content/`)
 
-```
-pip install pyinstaller
-pyinstaller --onefile --name catalog-builder --add-data "catalog_builder/assets;catalog_builder/assets" --add-data "config;config" build.py
-```
-
-Put `dist/catalog-builder.exe` and a `config.json` in `\\server\Catalog\builder\`. To update the builder for everyone, replace that one file.
-
-### Scheduled runs (Windows Task Scheduler)
-
-Action: `\\server\Catalog\builder\catalog-builder.exe --only-if-changed` · Trigger: daily, or at log on.
-(`run-catalog-build.bat` does the same thing for a manual double-click.)
-
-## 3. InDesign setup (one-time)
-
-1. **Preferences › File Handling** › check **Create Links When Placing Text and Spreadsheet Files**.
-2. Fonts: **Poppins** and **Lato** (both free; both on Adobe Fonts).
-3. In the catalog document, thread the course frames, then **File › Place** each `out/indesign/<PREFIX>.txt`, or `_ALL-COURSES.txt` for a single long story.
-4. The tagged files define these styles. Restyle them in InDesign however you like; on later updates choose **Use document style definitions** so your design wins:
-   - Paragraph styles: Subject Head · Course Head · Course Meta · Course Description · Course Requisite
-   - Character styles: Course Code · Credits · Campus On · Campus Off · IAI · Requisite Label
-   - Course Head uses a **right-indent tab** to push credits to the column edge.
-5. After a rebuild, the **Links** panel shows modified stories ⚠ › select › **Update Link**.
-
-> ⚠ Updating a link replaces that story. Make content edits in **FileMaker**, not in InDesign, or they'll be overwritten (and they should live in FileMaker anyway).
-
-## 4. Drupal (optional)
-
-Point a Feeds importer at `out/data/courses.json` (or `.csv`) mapped to a "Course" content type, keyed on `code`. Or embed `course-descriptions.html` as-is.
+`catalog.json` (year, colleges, section list) · `sections/*.md` (section text; `{{policy 500.4}}` pulls a Board policy) · `calendar.csv` · `programs/` (registry + program requirement files) · `policies/` (Board Policy Manual register) · `board.json` (trustees, checked against iecc.edu every build) · `addenda/<year>.csv` (approved addenda).
 
 ## Checks performed
 
-Errors: missing descriptions, draft/placeholder text, duplicate codes, invalid codes.
-Warnings: non-standard PREREQUISITE labels, broken apostrophes (`Labor?s`), references to courses not in the export, lecture + lab ≠ credit hours, invalid variable-credit flags, prefixes missing from the prefix list, and differences from the printed 2026–27 catalog (`config/print_comparison_2026-27.json`; set `"compare_to_print": false` in config.json to turn this off).
-Notes (auto-cleaned in output): stray spaces, odd characters in campus fields, identical descriptions, cross-listed titles.
+Errors: missing descriptions, placeholder text, duplicate or invalid codes, trustee list differs from iecc.edu, deleted policies referenced.
+Warnings: non-standard requisite labels, broken apostrophes (`Labor?s`), courses referenced but not in the export, lecture + lab ≠ credit hours, unknown prefixes, policy date mismatches, programs missing from meta majors.
+Notes: auto-cleaned spacing and characters, policies revised since the catalog was reviewed.
 
 ## Files
 
 ```
-build.py                     entry point
-config/prefixes.json         prefix → subject name (from the catalog's Course Prefixes page)
-config/print_comparison_…    one-time comparison against the printed 2026–27 PDF
-catalog_builder/model.py     reads the FileMaker XML, normalizes fields, splits out prerequisites
-catalog_builder/checks.py    data-quality rules
-catalog_builder/outputs.py   print PDF, InDesign tagged text, data, change detection
-catalog_builder/web.py       searchable web page
-catalog_builder/report.py    build report
-catalog_builder/assets/      print.css + fonts (Poppins, Lato — SIL Open Font License)
+build.py                       entry point
+config/prefixes.json           prefix → subject name
+catalog_builder/model.py       reads the FileMaker XML, splits out prerequisites
+catalog_builder/checks.py      data-quality rules
+catalog_builder/outputs.py     tagged text, data files, course PDF, change detection
+catalog_builder/book.py        full catalog (template + data) → HTML/PDF
+catalog_builder/idml.py        full catalog → InDesign IDML (+ page-fitting script)
+catalog_builder/digital.py     digital catalog website
+catalog_builder/publish.py     current / frozen editions, addenda, Drupal feeds, IIS web.config
+catalog_builder/pdfrender.py   PDF via WeasyPrint (Python package or bundled weasyprint.exe)
+catalog_builder/policies.py    Board policy register
+catalog_builder/trustees.py    Board of Trustees check
+catalog_builder/assets/        CSS, JS, fonts (Jost, EB Garamond: SIL OFL), IDML skeleton
+deploy/                        LOCAL-TEST.md, SERVER-SETUP.md, server config, scheduled task
+docs/DRUPAL-SETUP.md           Drupal content types + Feeds mapping
+tools/import_policies.py       rebuild content/policies from the Policy Manual PDFs
 ```

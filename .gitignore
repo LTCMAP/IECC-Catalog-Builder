@@ -10,3 +10,5 @@ build/
 !tests/*.xml
 config/print_comparison*.json
 local-config/
+!catalog_builder/assets/idml-skeleton/*.xml
+!catalog_builder/assets/idml-skeleton/**/*.xml

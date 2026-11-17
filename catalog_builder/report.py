@@ -53,22 +53,22 @@ def build_report(findings, changes: dict | None, meta: dict, n_courses: int, bui
     return f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Catalog build report · {esc(built_at)}</title>
 <style>
-body{{font:15px/1.5 Lato,system-ui,sans-serif;color:#1b1b1d;background:#f6f5f2;margin:0}}
-header{{background:#1b1b1d;color:#fff;border-top:8px solid #f9a719;padding:28px 32px}}
-header h1{{font:700 28px Poppins,system-ui,sans-serif;margin:0 0 4px}} header p{{margin:0;color:#cfcdc7}}
+body{{font:15px/1.5 Garamond,Georgia,sans-serif;color:#1b1b1d;background:#f6f5f2;margin:0}}
+header{{background:#027789;color:#fff;border-top:8px solid #1d2124;padding:28px 32px}}
+header h1{{font:700 28px Jost,system-ui,sans-serif;margin:0 0 4px}} header p{{margin:0;color:#cfcdc7}}
 main{{max-width:1080px;margin:0 auto;padding:24px 32px 60px}}
 .cards{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:0 0 28px}}
 .card{{background:#fff;border:1px solid #e2dfd8;border-radius:8px;padding:14px 16px}}
-.card b{{display:block;font:700 28px Poppins,system-ui,sans-serif}} .card span{{font:600 12px Poppins,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#55565a}}
-.card.error b{{color:#b42318}} .card.warning b{{color:#8a5a00}}
-h2{{font:600 20px Poppins,system-ui,sans-serif;border-bottom:3px solid #f9a719;padding-bottom:6px;margin:32px 0 14px}}
+.card b{{display:block;font:700 28px Jost,system-ui,sans-serif}} .card span{{font:600 12px Jost,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#55565a}}
+.card.error b{{color:#b42318}} .card.warning b{{color:#01596a}}
+h2{{font:600 20px Jost,system-ui,sans-serif;border-bottom:3px solid #027789;padding-bottom:6px;margin:32px 0 14px}}
 details{{background:#fff;border:1px solid #e2dfd8;border-radius:8px;margin:0 0 8px;padding:0}}
 summary{{cursor:pointer;padding:10px 14px;display:flex;gap:10px;align-items:center}}
-summary .n{{margin-left:auto;font:600 13px Poppins,system-ui;color:#55565a}}
-.pill{{font:700 10px Poppins,system-ui;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px}}
-.pill.error{{background:#fde7e5;color:#b42318}} .pill.warning{{background:#fdf0d5;color:#8a5a00}} .pill.info{{background:#eceae4;color:#55565a}}
+summary .n{{margin-left:auto;font:600 13px Jost,system-ui;color:#55565a}}
+.pill{{font:700 10px Jost,system-ui;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px}}
+.pill.error{{background:#fde7e5;color:#b42318}} .pill.warning{{background:#e3f0f2;color:#01596a}} .pill.info{{background:#eceae4;color:#55565a}}
 table{{width:100%;border-collapse:collapse;font-size:14px}} th,td{{text-align:left;padding:6px 14px;border-top:1px solid #eeebe4;vertical-align:top}}
-th{{font:600 11px Poppins,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#55565a}}
+th{{font:600 11px Jost,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#55565a}}
 td.c{{white-space:nowrap;font-weight:700}} td.old{{color:#b42318;text-decoration:line-through}} td.new{{color:#146c2e}}
 .muted{{color:#55565a}} .lead{{font-size:17px}}
 </style></head><body>

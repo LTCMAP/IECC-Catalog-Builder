@@ -1,14 +1,14 @@
 name: Build Windows app
 
-# Run from the repo's Actions tab ("Run workflow"), or push a tag like v0.2
+# Runs when you push a version tag (v1.1.0 ...), or from the repo's Actions tab ("Run workflow").
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
 
 permissions:
-  contents: write
-  
+  contents: write   # lets a tag push publish the zip as a Release
+
 jobs:
   build:
     runs-on: windows-latest
@@ -17,8 +17,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+
       - name: Install PyInstaller
         run: pip install pyinstaller
+
       - name: Build catalog-builder.exe
         run: >
           pyinstaller --onefile --name catalog-builder
@@ -26,24 +28,49 @@ jobs:
           --add-data "config;config"
           --add-data "content;content"
           build.py
-      - name: Smoke test (build from the 12-course sample)
+
+      # PDFs: the official standalone WeasyPrint for Windows (no Python/GTK needed on the PC that runs it)
+      - name: Get WeasyPrint for Windows (official release)
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          .\dist\catalog-builder.exe --export tests\sample-export.xml --out test-out --no-pdf --no-web-checks
+          $rel = gh api repos/Kozea/WeasyPrint/releases/latest | ConvertFrom-Json
+          $asset = $rel.assets | Where-Object { $_.name -eq "weasyprint-windows.zip" } | Select-Object -First 1
+          if (-not $asset) { $asset = $rel.assets | Where-Object { $_.name -like "*windows*.zip" } | Select-Object -First 1 }
+          if (-not $asset) { throw "No Windows build found in WeasyPrint $($rel.tag_name)" }
+          Write-Host "WeasyPrint $($rel.tag_name): $($asset.name)"
+          Invoke-WebRequest $asset.browser_download_url -OutFile weasyprint.zip
+          Expand-Archive weasyprint.zip -DestinationPath dist\weasyprint
+          $exe = Get-ChildItem dist\weasyprint -Recurse -Filter weasyprint.exe | Select-Object -First 1
+          if (-not $exe) { throw "weasyprint.exe not in the archive" }
+          & $exe.FullName --version
+          "WeasyPrint $($rel.tag_name) ($($asset.name)) from https://github.com/Kozea/WeasyPrint/releases (BSD-3-Clause license)" | Out-File dist\weasyprint\SOURCE.txt
+
+      - name: Smoke test (12-course sample, with PDFs and IDML)
+        run: |
+          .\dist\catalog-builder.exe --export tests\sample-export.xml --out test-out --no-web-checks --sample ABE
           if (!(Test-Path test-out\report.html)) { throw "report.html missing" }
-          if (!(Test-Path test-out\indesign\_ALL-COURSES.txt)) { throw "InDesign file missing" }
+          if (!(Test-Path test-out\indesign\_ALL-COURSES.txt)) { throw "InDesign text missing" }
+          if (!(Get-ChildItem test-out\indesign -Filter *.idml)) { throw "IDML missing" }
           if (!(Test-Path test-out\digital\index.html)) { throw "Digital catalog missing" }
+          if (!(Test-Path test-out\print\full-catalog.pdf)) { throw "Full catalog PDF missing" }
+
       - name: Package
         run: |
           New-Item -ItemType Directory pkg | Out-Null
           Copy-Item dist\catalog-builder.exe, run-catalog-build.bat, config.example.json, README.md pkg\
           Copy-Item deploy\run-nightly.bat pkg\
-          Copy-Item -Recurse deploy, docs, content pkg\
+          Copy-Item -Recurse dist\weasyprint, deploy, docs, content pkg\
+          New-Item -ItemType Directory pkg\sample | Out-Null
+          Copy-Item tests\sample-export.xml pkg\sample\
           Compress-Archive -Path pkg\* -DestinationPath catalog-builder-windows.zip
+
       - name: Upload (download it from the run's Summary page → Artifacts)
         uses: actions/upload-artifact@v4
         with:
           name: catalog-builder-windows
           path: catalog-builder-windows.zip
+
       - name: Attach to a Release (tag pushes only)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2

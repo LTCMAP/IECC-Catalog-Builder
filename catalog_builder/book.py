@@ -397,11 +397,11 @@ def build_book_html(courses: list[Course], prefixes: dict, content_dir: Path, lo
 
 
 def write_book(courses, prefixes, content_dir: Path, out_dir: Path, logo: Path | None = None) -> tuple[Path, dict]:
-    from weasyprint import HTML
+    from .pdfrender import render
 
     out_dir.mkdir(parents=True, exist_ok=True)
     doc, stats = build_book_html(courses, prefixes, content_dir, logo)
     (out_dir / "full-catalog.html").write_text(doc, encoding="utf-8")
     pdf = out_dir / "full-catalog.pdf"
-    HTML(string=doc, base_url=str(ASSETS)).write_pdf(pdf, pdf_variant="pdf/ua-1")
+    render(doc, pdf, ASSETS)
     return pdf, stats

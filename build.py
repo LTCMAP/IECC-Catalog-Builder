@@ -38,7 +38,11 @@ from catalog_builder.checks import Finding                # noqa: E402
 
 def main() -> int:
     cfg_path = APP_DIR / "config.json"
-    cfg = json.loads(cfg_path.read_text()) if cfg_path.exists() else {}
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8-sig")) if cfg_path.exists() else {}
+    # relative paths in config.json are relative to the folder that holds the exe / build.py
+    for _k in ("export", "out", "content", "site", "marketing_folder", "weasyprint"):
+        if cfg.get(_k) and not Path(cfg[_k]).is_absolute() and not str(cfg[_k]).startswith("\\\\"):
+            cfg[_k] = str((APP_DIR / cfg[_k]).resolve())
     ap = argparse.ArgumentParser(description="Build IECC catalog outputs from a FileMaker export.")
     ap.add_argument("--export", default=cfg.get("export"), help="Path to the FileMaker XML export")
     ap.add_argument("--out", default=cfg.get("out", "out"), help="Output folder (can be a network share)")
@@ -52,8 +56,12 @@ def main() -> int:
     ap.add_argument("--freeze", action="store_true", help="Also write this year's edition of record (once; never overwritten)")
     ap.add_argument("--site-url", default=cfg.get("site_url", ""), help="Public URL of the publish folder, used in feed links")
     ap.add_argument("--preview", action="store_true", default=bool(cfg.get("preview", False)), help="Tell search engines not to index the published site (draft/proofing)")
+    ap.add_argument("--marketing-folder", default=cfg.get("marketing_folder"), help="Also copy the IDML, PDF and report here (Marketing's shared folder)")
+    ap.add_argument("--no-idml", action="store_true", help="Skip the InDesign IDML of the full catalog")
     ap.add_argument("--sample", default=cfg.get("sample_prefixes", "ACC,LSC,WEL"), help="Prefixes for the short sample PDF")
     a = ap.parse_args()
+    from catalog_builder import pdfrender
+    pdfrender.configure(cfg.get("weasyprint"))
     if not a.export:
         ap.error("No export given (use --export or config.json)")
 
@@ -113,7 +121,7 @@ def main() -> int:
         try:
             pdfs = write_print(courses, prefixes, out / "print", [p.strip() for p in a.sample.split(",") if p.strip()])
         except (ImportError, OSError) as e:
-            print(f"PDF proof skipped (WeasyPrint not available: {e.__class__.__name__}). Everything else was built.")
+            print(f"PDF proof skipped ({e}). Everything else was built.")
     # Full catalog (template + FileMaker data)
     if not a.no_pdf and not a.no_book and (content / "catalog.json").exists():
         try:
@@ -127,26 +135,57 @@ def main() -> int:
                 if n:
                     findings.append(Finding("info", "Template placeholders left", f, f"{n} placeholder(s) still to fill in."))
         except (ImportError, OSError) as e:
-            print(f"Full catalog skipped (WeasyPrint not available: {e.__class__.__name__}).")
+            print(f"Full catalog PDF skipped ({e}).")
+
+    # One set of catalog pieces (template content + FileMaker data) for the IDML and the website
+    parts = None
+    if (content / "catalog.json").exists():
+        from catalog_builder.book import build_book_html
+        _, wstats = build_book_html(courses, prefixes, content)
+        parts = wstats["parts"]
+    built_day = " ".join(built_at.split(" ")[:3])
+    full_pdf = out / "print" / "full-catalog.pdf"
+    full_pdf = full_pdf if full_pdf.exists() else None
+
+    # InDesign: the full catalog as a styled IDML (plus the page-fitting script)
+    idml = None
+    if parts and not a.no_idml:
+        from catalog_builder.idml import write_idml
+        from catalog_builder.digital import _year_slug
+        res = write_idml(courses, prefixes, parts, out / "indesign" / f"IECC-Academic-Catalog-{_year_slug(parts['cat']['year'])}.idml",
+                         fonts=cfg.get("indesign_fonts"))
+        idml = res["path"]
+        print(f"InDesign IDML: {idml.name} ({res['pages']} pages estimated; run 'Fit catalog pages.jsx' in InDesign to settle page flow)")
 
     # Digital catalog (website) + Drupal feeds
     site_result = None
-    if (content / "catalog.json").exists():
-        from catalog_builder.book import build_book_html
+    if parts:
         from catalog_builder.digital import build_site
-        _, wstats = build_book_html(courses, prefixes, content)
-        full_pdf = out / "print" / "full-catalog.pdf"
-        full_pdf = full_pdf if full_pdf.exists() else None
-        build_site(courses, prefixes, wstats["parts"], out / "digital", kind="current", built=" ".join(built_at.split(" ")[:3]), pdf=full_pdf)
+        build_site(courses, prefixes, parts, out / "digital", kind="current", built=built_day, pdf=full_pdf)
         if a.site:
             from catalog_builder.publish import publish
-            site_result = publish(courses, prefixes, wstats["parts"], content, Path(a.site), built=" ".join(built_at.split(" ")[:3]),
+            site_result = publish(courses, prefixes, parts, content, Path(a.site), built=built_day,
                                   pdf=full_pdf, freeze=a.freeze, base_url=a.site_url, preview=a.preview)
             for sev, rule, code, msg in site_result["notes"]:
                 findings.append(Finding(sev, rule, code, msg))
 
     rpt = write_report(out / "report.html", findings=findings, changes=changes, meta=meta, n_courses=len(courses),
                        built_at=built_at, export_name=export.name)
+
+    # Marketing's shared folder: the files they review (IDML + script, PDF proof, report)
+    if a.marketing_folder:
+        import shutil
+        dest = Path(a.marketing_folder)
+        try:
+            dest.mkdir(parents=True, exist_ok=True)
+            sent = []
+            for f in [idml, (out / "indesign" / "Fit catalog pages.jsx") if idml else None, full_pdf, rpt]:
+                if f and Path(f).exists():
+                    shutil.copy2(f, dest / Path(f).name)
+                    sent.append(Path(f).name)
+            print(f"Copied to {dest}: {', '.join(sent)}")
+        except OSError as e:
+            print(f"Couldn't copy to the Marketing folder {dest}: {e}")
 
     stamp = datetime.now().strftime("%Y-%m-%d_%H%M")
     snap_json = json.dumps(new_snap, indent=1, ensure_ascii=False)
@@ -156,7 +195,7 @@ def main() -> int:
 
     errs = sum(f.severity == "error" for f in findings)
     warns = sum(f.severity == "warning" for f in findings)
-    print(f"InDesign files: {len(tt)} · PDFs: {len(pdfs)} · web: {web.name} · report: {rpt}")
+    print(f"InDesign files: {len(tt)} tagged text{' + IDML' if idml else ''} · PDFs: {len(pdfs)} · web: {web.name} · report: {rpt}")
     print(f"Checks: {errs} errors, {warns} warnings")
     print(f"Digital catalog: {out / 'digital' / 'index.html'}" + (f" · published to {a.site} ({', '.join(site_result['years'])})" if site_result else ""))
     if changes:

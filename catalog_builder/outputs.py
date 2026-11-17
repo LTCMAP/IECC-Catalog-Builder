@@ -73,8 +73,8 @@ def course_html(c: Course) -> str:
 
 def write_print(courses, prefixes, out_dir: Path, sample_prefixes: list[str] | None = None) -> list[Path]:
     """Course-descriptions section on its own (brand styles). The full book is book.write_book()."""
-    from weasyprint import HTML
     from .book import courses_html
+    from .pdfrender import render
 
     out_dir.mkdir(parents=True, exist_ok=True)
     written = []
@@ -85,7 +85,7 @@ def write_print(courses, prefixes, out_dir: Path, sample_prefixes: list[str] | N
         body, _ = courses_html(cs, prefixes)
         doc = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Course Descriptions | IECC Academic Catalog</title>'
                '<link rel="stylesheet" href="catalog.css"></head><body>' + body + "</body></html>")
-        HTML(string=doc, base_url=str(ASSETS)).write_pdf(out_dir / name, pdf_variant="pdf/ua-1")
+        render(doc, out_dir / name, ASSETS)
         written.append(out_dir / name)
     return written
 
