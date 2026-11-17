@@ -15,6 +15,7 @@ from pathlib import Path
 
 DEFAULT_URL = "https://iecc.edu/iecc/about-employment/iecc-district/board-trustees"
 CARD = re.compile(r'class="card-label"[^>]*>(.*?)</div>.*?class="card-title"[^>]*>(.*?)</div>', re.S)
+CARD = re.compile(r'''class=["']card-label["'][^>]*>(.*?)</div>.*?class=["']card-title["'][^>]*>(.*?)</div>''', re.S)  # single or double quotes
 OFFICERS = re.compile(r"([A-Z][\w.'-]+(?: [A-Z][\w.'-]+)+) currently serves as the Board Treasurer and ([A-Z][\w.'-]+(?: [A-Z][\w.'-]+)+) as the Board Secretary")
 
 
@@ -50,6 +51,8 @@ def load(content_dir: Path) -> dict:
 def compare(saved: dict, live: dict) -> list:
     """Return issues tuples (severity, rule, code, message)."""
     out = []
+    if live.get("members") is not None and not live["members"]:
+        return [("warning", "Trustee check failed", "website", "The trustees page loaded but no trustee cards were found. The page layout may have changed; check it by hand.")]
     key = lambda m: re.sub(r"^(dr|mr|mrs|ms)\.?\s+", "", m["name"].lower())
     s = {key(m): m for m in saved.get("members", [])}
     w = {key(m): m for m in live.get("members", [])}
